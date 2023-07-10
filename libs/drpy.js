@@ -110,7 +110,7 @@ var _pdfh;
 var _pdfa;
 var _pd;
 // const DOM_CHECK_ATTR = ['url', 'src', 'href', 'data-original', 'data-src'];
-const DOM_CHECK_ATTR = /(url|src|href|-original|-src|-play|-url)$/;
+const DOM_CHECK_ATTR = /(url|src|href|-original|-src|-play|-url|style)$/;
 const SELECT_REGEX = /:eq|:lt|:gt|#/g;
 const SELECT_REGEX_A = /:eq|:lt|:gt/g;
 
@@ -2124,6 +2124,7 @@ function playParse(playObj){
 function proxyParse(proxyObj){
     var input = proxyObj.params;
     if(proxyObj.proxy_rule){
+        log('准备执行本地代理规则:\n'+proxyObj.proxy_rule);
         try {
             eval(proxyObj.proxy_rule);
             if(input && input!== proxyObj.params && Array.isArray(input) &&input.length===3){
