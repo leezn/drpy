@@ -43,13 +43,14 @@ def admin_index():  # 管理员界面
     lsg = storage_service()
     live_url = lsg.getItem('LIVE_URL')
     use_py = lsg.getItem('USE_PY')
+    force_up = lsg.getItem('FORCE_UP')
     js0_password = lsg.getItem('JS0_PASSWORD')
     # print(f'live_url:', live_url)
     rules = getRules('js')
     # print(rules)
     cache_count = getCacheCount()
     # print(cache_count)
-    return render_template('admin.html', js0_password=js0_password, pystate=use_py, rules=rules,
+    return render_template('admin.html', js0_password=js0_password, pystate=use_py,force_up=force_up, rules=rules,
                            cache_count=cache_count, ver=getLocalVer(), live_url=live_url)
 
 
@@ -63,7 +64,9 @@ def admin_settings():  # 管理员界面
     # print(conf_lists)
     jar_lists = get_jar_list()
     SPIDER_JAR = lsg.getItem('SPIDER_JAR', 'custom_spider.jar')
-    return render_template('settings.html', conf_lists=conf_lists, jar_lists=jar_lists, jar_now=SPIDER_JAR,
+    ZB_PLAYER = lsg.getItem('ZB_PLAYER', '1')
+    # print('ZB_PLAYER:',ZB_PLAYER)
+    return render_template('settings.html', conf_lists=conf_lists, jar_lists=jar_lists, jar_now=SPIDER_JAR,player_now=ZB_PLAYER,
                            ver=getLocalVer())
 
 
@@ -215,7 +218,8 @@ def admin_update_ver():
         return R.failed('请登录后再试')
     lsg = storage_service()
     update_proxy = lsg.getItem('UPDATE_PROXY')
-    msg = download_new_version(update_proxy)
+    force_up = lsg.getItem('FORCE_UP')
+    msg = download_new_version(update_proxy,force_up)
     return R.success(msg)
 
 
@@ -362,6 +366,18 @@ def admin_change_use_py():
     new_use_py = '' if use_py else '1'
     state = '开启' if new_use_py else '关闭'
     id = lsg.setItem('USE_PY', new_use_py)
+    msg = f'已修改的配置记录id为:{id},结果为{state}'
+    return R.success(msg)
+
+@admin.route('/change_force_up')
+def admin_change_force_up():
+    if not verfy_token():
+        return R.failed('请登录后再试')
+    lsg = storage_service()
+    force_up = lsg.getItem('FORCE_UP')
+    new_force_up = '' if force_up else '1'
+    state = '开启' if new_force_up else '关闭'
+    id = lsg.setItem('FORCE_UP', new_force_up)
     msg = f'已修改的配置记录id为:{id},结果为{state}'
     return R.success(msg)
 
@@ -578,5 +594,6 @@ def admin_lives_web():
                 'url':line.split(',')[1],
             })
     print(lives)
-    # lsg = storage_service()
-    return render_template('lives.html',ver=getLocalVer(),lives=lives)
+    lsg = storage_service()
+    zb_player = lsg.getItem('ZB_PLAYER','1')
+    return render_template('lives.html',ver=getLocalVer(),lives=lives,zb_player=zb_player)
